@@ -16,6 +16,10 @@ public class Display : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        reachable = scan();
+        Debug.Log(reachable);
+
+
         if(reachable && show == null)
         {
             shine.intensity = 100f;
@@ -40,5 +44,18 @@ public class Display : MonoBehaviour {
 
         }
 	}
+
+    private bool scan()
+    {
+        int count = 0;
+        foreach(Collider worker in Physics.OverlapSphere(transform.position,10f))
+        {
+            if(worker.GetComponent<Player>() != null)
+            {
+                count++;
+            }
+        }
+        return count > 0;
+    }
 
 }

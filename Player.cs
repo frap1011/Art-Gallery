@@ -37,17 +37,21 @@ public class Player : MonoBehaviour {
 	void Update () {
         float leftRight = Input.GetAxisRaw("Horizontal") * 1.5f;
         float step = Input.GetAxisRaw("Vertical") * .5f;
+        float y = -Input.GetAxisRaw("Mouse Y");
         float sight = Input.GetAxisRaw("Mouse ScrollWheel") * 50f;
         Vector3 neck = eyes.transform.rotation.eulerAngles;
         bool up = neck.x < 180f && neck.x < 45f;
-        bool down = neck.x < 360f && neck.x > 345f;
-        bool snap = up || down;
+        bool down = neck.x < 360f && neck.x > 335f;
+        bool snapX = up || down;
+        //bool right = neck.y 
+
+            
+
         if (Physics.SphereCast(lineOfSight.position, 4f, lineOfSight.forward, out aim, 10f))
         {
             if(aim.collider.gameObject.GetComponent<Display>() != null)
             {
                 target = aim.collider.gameObject.GetComponent<Display>();
-                target.reachable = true;
                 if(Input.GetMouseButtonDown(0) && isHolding)
                 {
                     place(target.shine.transform);
@@ -58,47 +62,30 @@ public class Player : MonoBehaviour {
         {
             if(target != null)
             {
-                target.reachable = false;
                 target = null;
             }
         }
 
 
+        lineOfSight.Rotate(y, 0f, 0f);
 
-
-        movePoint = new Vector3(leftRight, 0, step);
+        movePoint = new Vector3(0, 0, step);
         movePoint = transform.TransformDirection(movePoint);
         movePoint = movePoint * speed;
         movePoint.y -= (50f * Time.deltaTime);
-        transform.Rotate(0f, sight, 0f);
+        transform.Rotate(0f, leftRight, 0f);
         if(Input.GetMouseButtonDown(0) && !isHolding)
         {
             hold();
         }
-        
 
-        
-        
-
-
-        if (snap)
+        if (!snapX)
         {
-            if (Input.GetKey(KeyCode.E))
-            {
-                eyes.transform.Rotate(1f, 0f, 0f);               
-            }
-            if (Input.GetKey(KeyCode.Q))
-            {
-                eyes.transform.Rotate(-1f, 0f, 0f);
-            }
-        }
-        else
-        {
-            if(neck.x >= 45f && neck.x < 180f)
+            if (neck.x >= 45f && neck.x < 180f)
             {
                 eyes.transform.Rotate(-2f, 0, 0);
             }
-            else if(neck.x < 360f && neck.x <= 345f)
+            else if (neck.x < 360f && neck.x <= 335f)
             {
                 eyes.transform.Rotate(2f, 0, 0);
             }
@@ -142,6 +129,11 @@ public class Player : MonoBehaviour {
         }
         skull = null;
         isHolding = false;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawRay(lineOfSight.position, lineOfSight.forward * 10f);
     }
 
 
