@@ -2,22 +2,39 @@
 
 public class Display : MonoBehaviour {
     [SerializeField]
-    private Art show;
+    public Art show;
     [SerializeField]
     public Light shine;
     public bool reachable;
+    [SerializeField]
+    private string correct;
+    [SerializeField]
+    private bool right;
+    public bool isOccupied;
 
 	void Start () {
 
         shine = GetComponentInChildren<Light>();
         shine.intensity = 0f;
+        reachable = false;
+        right = false;
+        isOccupied = false;
+
+        
 		
 	}
 	
 	// Update is called once per frame
 	void Update () {
         reachable = scan();
-        Debug.Log(reachable);
+        
+        
+     
+        if(isOccupied)
+        {
+            right = scan2();
+        }
+        
 
 
         if(reachable && show == null)
@@ -36,12 +53,8 @@ public class Display : MonoBehaviour {
 		else
         {
             show.transform.position = shine.transform.position;
-            if(show.GetComponent<Rigidbody>() != null)
-            {
-                Destroy(show.GetComponent<Rigidbody>());
-            }
-
-
+            isOccupied = true;
+            Debug.Log(show.name.Equals(correct));
         }
 	}
 
@@ -56,6 +69,11 @@ public class Display : MonoBehaviour {
             }
         }
         return count > 0;
+    }
+
+    private bool scan2()
+    {
+        return show.name == correct; 
     }
 
 }

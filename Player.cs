@@ -54,7 +54,11 @@ public class Player : MonoBehaviour {
                 target = aim.collider.gameObject.GetComponent<Display>();
                 if(Input.GetMouseButtonDown(0) && isHolding)
                 {
-                    place(target.shine.transform);
+                    target.isOccupied = true;
+                    skull.transform.SetParent(target.transform);
+                    skull.transform.position = target.transform.position;
+                    target.show = skull;
+                    skull = null;
                 }
             }
         }
@@ -92,6 +96,7 @@ public class Player : MonoBehaviour {
         }
 
         spine.Move(movePoint * Time.deltaTime);
+        isHolding = holdOut();
         
 
         
@@ -102,39 +107,26 @@ public class Player : MonoBehaviour {
     //Puts the piece of art in your hand if it is reachable
     private void hold()
     {
-        if(Physics.SphereCast(lineOfSight.position,4f,lineOfSight.forward, out aim, 10f))
+       
+        if(Physics.SphereCast(lineOfSight.position,4f,lineOfSight.forward, out aim, 6f))
         {
-            if(aim.collider.GetComponent<Art>() != null)
-            {
+            if(aim.collider.GetComponent<Art>() != null && (!aim.collider.GetComponent<Art>().OnDisplay 
+                || !aim.collider.GetComponent<Display>().isOccupied)){
                 GameObject piece = aim.collider.gameObject;
                 Debug.Log(piece.name);
                 piece.transform.SetParent(palm.transform);
                 piece.transform.position = palm.transform.position;
                 Destroy(piece.GetComponent<Rigidbody>());
                 skull = piece.GetComponent<Art>();
-                isHolding = true;
                 
             }
         }
+
         
     }
-
-    private void place(Transform tgt)
+    private bool holdOut()
     {
-        skull.transform.SetParent(tgt);
-        skull.transform.position = tgt.position;
-        if(skull.GetComponent<Rigidbody>().useGravity)
-        {
-            skull.GetComponent<Rigidbody>().useGravity = false;
-        }
-        skull = null;
-        isHolding = false;
+        return palm.GetComponentInChildren<Art>() != null;
     }
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawRay(lineOfSight.position, lineOfSight.forward * 10f);
-    }
-
 
 }
