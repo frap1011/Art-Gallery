@@ -9,15 +9,16 @@ public class Player : MonoBehaviour {
     [SerializeField]
     private Transform lineOfSight;
     private Vector3 movePoint = Vector3.zero;
-    public float speed = 16.0f;
+    private float speed = 25.0f;
     private static RaycastHit aim;
     [SerializeField]
     private bool isHolding = false;
     [SerializeField]
     private Hand palm;
-    [SerializeField]
-    private Art skull;
+    /*[SerializeField]
+    private Art skull;*/
     private Display target;
+    private Painting DaVinci;
 
 
 
@@ -43,11 +44,12 @@ public class Player : MonoBehaviour {
         bool up = neck.x < 180f && neck.x < 45f;
         bool down = neck.x < 360f && neck.x > 335f;
         bool snapX = up || down;
-        //bool right = neck.y 
 
-            
 
-        if (Physics.SphereCast(lineOfSight.position, 4f, lineOfSight.forward, out aim, 10f))
+
+
+        /*
+        if (Physics.SphereCast(lineOfSight.position, 8f, lineOfSight.forward, out aim, 10f))
         {
             if(aim.collider.gameObject.GetComponent<Display>() != null)
             {
@@ -68,6 +70,36 @@ public class Player : MonoBehaviour {
             {
                 target = null;
             }
+        }*/
+        Ray target = new Ray(lineOfSight.position, lineOfSight.forward);
+        if (Physics.SphereCast(target, 2f, out aim, 10f))
+        {
+            if(aim.collider.GetComponent<Painting>() != null)
+            {
+                Painting get = aim.collider.GetComponent<Painting>();
+                get.spotted = true;
+                get.time = Time.time;
+                if(Input.GetMouseButtonDown(0) && DaVinci == null && !get.IsFound)
+                {
+                    DaVinci = get;
+                    DaVinci.IsChosen = true;
+                }
+                else if(Input.GetMouseButtonDown(0) && DaVinci != null && !get.IsFound)
+                {
+                    DaVinci.IsChosen = false;
+                    if(DaVinci.spin == get.spin)
+                    {
+                        DaVinci.IsFound = true;
+                        get.IsFound = true;
+                    }
+                    else
+                    {
+                        DaVinci.frame.material = DaVinci.defaults[5];
+                    }
+                    DaVinci = null; 
+                }
+                //get.GetComponent<MeshRenderer>().material = Painting.interem;
+            }
         }
 
 
@@ -76,12 +108,13 @@ public class Player : MonoBehaviour {
         movePoint = new Vector3(0, 0, step);
         movePoint = transform.TransformDirection(movePoint);
         movePoint = movePoint * speed;
-        movePoint.y -= (50f * Time.deltaTime);
+        movePoint.y -= (500f * Time.deltaTime);
         transform.Rotate(0f, leftRight, 0f);
+        /*
         if(Input.GetMouseButtonDown(0) && !isHolding)
         {
             hold();
-        }
+        }*/
 
         if (!snapX)
         {
@@ -96,7 +129,7 @@ public class Player : MonoBehaviour {
         }
 
         spine.Move(movePoint * Time.deltaTime);
-        isHolding = holdOut();
+        //holdOut();
         
 
         
@@ -105,6 +138,7 @@ public class Player : MonoBehaviour {
 	}
 
     //Puts the piece of art in your hand if it is reachable
+    /*
     private void hold()
     {
        
@@ -123,10 +157,15 @@ public class Player : MonoBehaviour {
         }
 
         
-    }
-    private bool holdOut()
+    }*/
+    private void holdOut()
     {
-        return palm.GetComponentInChildren<Art>() != null;
+        isHolding = palm.GetComponentInChildren<Art>() != null;
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawRay(lineOfSight.position, lineOfSight.forward * 10f);
     }
 
 }

@@ -5,70 +5,65 @@ using UnityEngine;
 public class Painting : MonoBehaviour {
 
     [SerializeField]
-    private float sight = 8f;
-    [SerializeField]
-    private bool inView = false;
-    [SerializeField]
     public Material spin;
     public MeshRenderer frame;
-    [SerializeField]
-    private Material dark;
-    [SerializeField]
-    private Material orange;
-    public static Material interem;
-    public static Material blank;
     public bool spotted = false;
+    public float time;
+    public Material[] defaults = new Material[6];
+    public bool IsFound = false;
+    public bool IsChosen = false;
+    private Light shine;
+    
     
 
 	void Start () {
         frame.material = spin;
-        interem = orange;
-        blank = dark;
+        spotted = false;
+        time = Time.time;
+        shine = GetComponentInChildren<Light>();
 
-    }
+}
 	
 	// Update is called once per frame
 	void Update () {
-        reveal();
-        spotted = false;
-        if(inView)
+        shine.color = GetComponent<MeshRenderer>().material.color;
+
+        if (!IsFound)
+        {
+            if ((Time.time - time) > 1.5f)
+            {
+                spotted = false;
+            }
+
+            if (spotted && !IsChosen)
+            {
+                GetComponent<MeshRenderer>().material = defaults[4];
+                frame.material = spin;
+                shine.intensity = 5f;
+            }
+            else if(IsChosen)
+            {
+                GetComponent<MeshRenderer>().material = defaults[2];
+                frame.material = spin;
+                shine.intensity = 5f;
+            }
+            else
+            {
+                GetComponent<MeshRenderer>().material = defaults[0];
+                frame.material = defaults[1];
+                shine.intensity = 0f;
+            }
+        }
+        else
         {
             frame.material = spin;
-        }
-        else
-        {
-            frame.material = blank;
-        }
-        if(spotted)
-        {
-            GetComponent<MeshRenderer>().material = interem;
-        }
-        else
-        {
-            GetComponent<MeshRenderer>().material.color = Color.white;
+            GetComponent<MeshRenderer>().material = defaults[3];
+            shine.intensity = 5f;
+
         }
 
 	}
 
-    public void reveal()
-    {
-        Collider[] inter = Physics.OverlapSphere(transform.position, sight);
-        foreach(Collider space in inter)
-        {
-            if(space.GetComponent<Player>() != null)
-            {
-                inView = true;
-            }
-            else
-            {
-                inView = false;
-            }
-        }
-    }
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, sight);
 
-    }
+
 }
