@@ -13,6 +13,8 @@ public class Painting : MonoBehaviour {
     public bool IsFound = false;
     public bool IsChosen = false;
     private Light shine;
+    [SerializeField]
+    private float luster;
     
     
 
@@ -30,7 +32,7 @@ public class Painting : MonoBehaviour {
 
         if (!IsFound)
         {
-            if ((Time.time - time) > 1.5f)
+            if ((Time.time - time) > .01f)
             {
                 spotted = false;
             }
@@ -39,13 +41,13 @@ public class Painting : MonoBehaviour {
             {
                 GetComponent<MeshRenderer>().material = defaults[4];
                 frame.material = spin;
-                shine.intensity = 5f;
+                shine.intensity = luster;
             }
             else if(IsChosen)
             {
                 GetComponent<MeshRenderer>().material = defaults[2];
                 frame.material = spin;
-                shine.intensity = 5f;
+                shine.intensity = luster;
             }
             else
             {
@@ -58,7 +60,7 @@ public class Painting : MonoBehaviour {
         {
             frame.material = spin;
             GetComponent<MeshRenderer>().material = defaults[3];
-            shine.intensity = 5f;
+            shine.intensity = luster;
 
         }
 
