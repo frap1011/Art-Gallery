@@ -113,7 +113,7 @@ public class Player : MonoBehaviour {
 				if (count == TOTAL_PAIR)
                 {
 					GameObject wall = GameObject.FindGameObjectWithTag("Wall");
-					//先设置它的可用为false，就看不见它了
+				
 					Destroy(wall);
                     finishText.text = "Door open";
                 }
