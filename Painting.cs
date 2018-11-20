@@ -13,14 +13,13 @@ public class Painting : MonoBehaviour {
     public bool IsFound = false;
     public bool IsChosen = false;
     private Light shine;
-    [SerializeField]
-    private float luster;
+    private static float luster = 10f;
+    public bool nope = false;
     
     
 
 	void Start () {
         frame.material = spin;
-        spotted = false;
         time = Time.time;
         shine = GetComponentInChildren<Light>();
 
@@ -29,15 +28,21 @@ public class Painting : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         shine.color = GetComponent<MeshRenderer>().material.color;
+        if(IsChosen || nope)
+        {
+            spotted = false;
+        }
 
         if (!IsFound)
         {
-            if ((Time.time - time) > .01f)
+            if ((Time.time - time) > .1f)
             {
                 spotted = false;
+                nope = false;
+
             }
 
-            if (spotted && !IsChosen)
+            if (spotted/* && !IsChosen*/)
             {
                 GetComponent<MeshRenderer>().material = defaults[4];
                 frame.material = spin;
@@ -49,12 +54,19 @@ public class Painting : MonoBehaviour {
                 frame.material = spin;
                 shine.intensity = luster;
             }
+            else if(!spotted && nope)
+            {
+                GetComponent<MeshRenderer>().material = defaults[5];
+                frame.material = spin;
+                shine.intensity = luster;
+            }
             else
             {
                 GetComponent<MeshRenderer>().material = defaults[0];
                 frame.material = defaults[1];
                 shine.intensity = 0f;
             }
+            
         }
         else
         {

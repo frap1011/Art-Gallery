@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour {
 
@@ -12,14 +15,16 @@ public class Player : MonoBehaviour {
     private float speed = 25.0f;
     private static RaycastHit aim;
     [SerializeField]
-    private bool isHolding = false;
-    [SerializeField]
     private Hand palm;
     /*[SerializeField]
     private Art skull;*/
     private Display target;
     private Painting DaVinci;
 
+	private int count;
+	private const int TOTAL_PAIR = 2;
+	public Text countText;
+	public Text finishText;
 
 
     void Start () {
@@ -27,8 +32,9 @@ public class Player : MonoBehaviour {
         eyes = GetComponentInChildren<Camera>();
         lineOfSight = eyes.transform;
         palm = GetComponentInChildren<Hand>();
-        
-        
+		count = 0;
+		countText.text = "Count: " + count.ToString();
+		finishText.text = "";
         
         
 
@@ -40,10 +46,7 @@ public class Player : MonoBehaviour {
         float step = Input.GetAxisRaw("Vertical") * .5f;
         float y = -Input.GetAxisRaw("Mouse Y");
         float sight = Input.GetAxisRaw("Mouse ScrollWheel") * 50f;
-        Vector3 neck = eyes.transform.rotation.eulerAngles;
-        bool up = neck.x < 180f && neck.x < 45f;
-        bool down = neck.x < 360f && neck.x > 335f;
-        bool snapX = up || down;
+        
 
 
 
@@ -77,6 +80,7 @@ public class Player : MonoBehaviour {
             if(aim.collider.GetComponent<Painting>() != null)
             {
                 Painting get = aim.collider.GetComponent<Painting>();
+                Debug.Log(get);
                 get.spotted = true;
                 get.time = Time.time;
                 if(Input.GetMouseButtonDown(0) && DaVinci == null && !get.IsFound)
@@ -84,23 +88,42 @@ public class Player : MonoBehaviour {
                     DaVinci = get;
                     DaVinci.IsChosen = true;
                 }
-                else if(Input.GetMouseButtonDown(0) && DaVinci != null && !get.IsFound)
+                else if(Input.GetMouseButtonDown(0) && DaVinci != null && !get.IsFound && DaVinci.name != get.name)
                 {
                     DaVinci.IsChosen = false;
                     if(DaVinci.spin == get.spin)
                     {
                         DaVinci.IsFound = true;
                         get.IsFound = true;
+						count++;
+						countText.text = "Count: " + count.ToString();
                     }
                     else
                     {
-                        DaVinci.frame.material = DaVinci.defaults[5];
+                        DaVinci.time = Time.time;
+                        get.time = Time.time;
+                        DaVinci.nope = true;
+                        get.nope = true;
+
                     }
                     DaVinci = null; 
                 }
-                //get.GetComponent<MeshRenderer>().material = Painting.interem;
+
+
+				if (count == TOTAL_PAIR)
+                {
+					GameObject wall = GameObject.FindGameObjectWithTag("Wall");
+					//先设置它的可用为false，就看不见它了
+					Destroy(wall);
+                    finishText.text = "Door open";
+                }
+
+
             }
         }
+        snapBack();
+
+    
 
 
         lineOfSight.Rotate(y, 0f, 0f);
@@ -116,17 +139,7 @@ public class Player : MonoBehaviour {
             hold();
         }*/
 
-        if (!snapX)
-        {
-            if (neck.x >= 45f && neck.x < 180f)
-            {
-                eyes.transform.Rotate(-2f, 0, 0);
-            }
-            else if (neck.x < 360f && neck.x <= 335f)
-            {
-                eyes.transform.Rotate(2f, 0, 0);
-            }
-        }
+        
 
         spine.Move(movePoint * Time.deltaTime);
         //holdOut();
@@ -136,6 +149,17 @@ public class Player : MonoBehaviour {
         
 		
 	}
+    /*
+	private void OnTriggerEnter(Collider other)
+    {
+        if ((count == TOTAL_PAIR) && other.gameObject.CompareTag("Wall"))
+        {
+            other.gameObject.SetActive(false);
+            finishText.text = "Door open";
+        }
+
+
+    }*/
 
     //Puts the piece of art in your hand if it is reachable
     /*
@@ -158,14 +182,30 @@ public class Player : MonoBehaviour {
 
         
     }*/
-    private void holdOut()
-    {
-        isHolding = palm.GetComponentInChildren<Art>() != null;
-    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawRay(lineOfSight.position, lineOfSight.forward * 10f);
+    }
+
+    private void snapBack()
+    {
+        Vector3 neck = eyes.transform.rotation.eulerAngles;
+        bool up = neck.x < 180f && neck.x < 45f;
+        bool down = neck.x < 360f && neck.x > 335f;
+        bool snapX = up || down;
+        if (!snapX)
+        {
+            if (neck.x >= 45f && neck.x < 180f)
+            {
+                eyes.transform.Rotate(-2f, 0, 0);
+            }
+            else if (neck.x < 360f && neck.x <= 335f)
+            {
+                eyes.transform.Rotate(2f, 0, 0);
+            }
+        }
+
     }
 
 }
